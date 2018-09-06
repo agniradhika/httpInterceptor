@@ -21,10 +21,8 @@ export class MyHttpInterceptor implements HttpInterceptor {
         );
 
 console.log("Sending request with new header now ...");
-return next.handle(authReq).pipe
-(
-    tap
-    ((event)=>{
+return next.handle(authReq).pipe(
+    tap((event)=>{
     // Succeeds when there is a response; ignore other events
         if(event instanceof HttpResponse )
         {
@@ -38,8 +36,7 @@ return next.handle(authReq).pipe
 
    // Log when response observable either completes or errors
     finalize(() => {
-        console.log('completed')
-       
+        console.log('completed');
     })
 )
 }
