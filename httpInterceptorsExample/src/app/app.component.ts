@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
+import { TokenService } from './token.service';
+
 
 @Component({
   selector: 'app-root',
@@ -8,22 +10,21 @@ import { HttpClient } from "@angular/common/http";
 })
 export class AppComponent {
   title = 'httpInterceptorsExample';
-  constructor(private httpClient: HttpClient){ }
-
+  constructor(private httpClient: HttpClient, private tokenService : TokenService){ }
   method1Call(): void {
-    this.httpClient.get("https://jsonplaceholder.typicode.com/users").subscribe(
-      success => {
+    this.tokenService.getData().subscribe(
+      (response: any) => {
         console.log("Successfully Completed");
-        console.log(success);
+        console.log(response);
       }
     );
   }
 
   method2Call(): void {
-    this.httpClient.get("https://jsonplaceholder.typicode.com/user12").subscribe(
-      success => {
+    this.tokenService.getNewData().subscribe(
+      data => {
         console.log("Successfully Completed");
-        console.log(success);
+        console.log(data);
       }
     );
   }
