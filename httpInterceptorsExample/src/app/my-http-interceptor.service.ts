@@ -15,14 +15,17 @@ export class MyHttpInterceptorService implements HttpInterceptor {
   isRefreshingToken: boolean = false;
     tokenSubject: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
-    constructor(private injector: Injector) {}
+    constructor(private injector: Injector) {
+      console.log("In myhttpinterceptor constructor")
+    }
 
     addToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
         return req.clone({ setHeaders: { Authorization: 'Bearer ' + token }})
     }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpSentEvent | HttpHeaderResponse | HttpProgressEvent | HttpResponse<any> | HttpUserEvent<any>> {
-        const authService = this.injector.get(AuthService);
+      console.log("in interceptor") 
+      const authService = this.injector.get(AuthService);
         return next.handle(this.addToken(req, authService.getToken())).
         pipe(tap((error)=>{
           if (error instanceof HttpErrorResponse) {
@@ -49,9 +52,10 @@ export class MyHttpInterceptorService implements HttpInterceptor {
       return observableThrowError(error);
   }
   handle401Error(req: HttpRequest<any>, next: HttpHandler) {
+    console.log("Handle401Error")
     if (!this.isRefreshingToken) {
         this.isRefreshingToken = true;
-
+console.log("token Reset")
         // Reset here so that the following requests wait until the token
         // comes back from the refreshToken call.
         this.tokenSubject.next(null);
@@ -62,6 +66,7 @@ export class MyHttpInterceptorService implements HttpInterceptor {
             switchMap((newToken: string) => {
                 if (newToken) {
                     this.tokenSubject.next(newToken);
+                    console.log("getting new request")
                     return next.handle(this.addToken(this.getNewRequest(req), newToken));
                 }
 
@@ -72,7 +77,8 @@ export class MyHttpInterceptorService implements HttpInterceptor {
                 // If there is an exception calling 'refreshToken', bad news so logout.
                 return this.logoutUser();
             }),
-            finalize(() => {
+            finalize(() => { 
+              console.log("make refreshtoken false")
                 this.isRefreshingToken = false;
             }),);
     } else {
@@ -80,6 +86,7 @@ export class MyHttpInterceptorService implements HttpInterceptor {
             filter(token => token != null),
             take(1),
             switchMap(token => {
+              console.log("getting new request")
                 return next.handle(this.addToken(this.getNewRequest(req), token));
             }),);
     }
@@ -90,6 +97,7 @@ export class MyHttpInterceptorService implements HttpInterceptor {
         Do not include in your code, just use 'req' instead of 'this.getNewRequest(req)'.
     */
    getNewRequest(req: HttpRequest<any>): HttpRequest<any> {
+     console.log("getNewRequest")
     if (req.url.indexOf('getData') > 0) {
         return new HttpRequest('GET', 'http://private-4002d-testerrorresponses.apiary-mock.com/getData');
     }
@@ -99,7 +107,7 @@ export class MyHttpInterceptorService implements HttpInterceptor {
 
 logoutUser() {
     // Route to the login page (implementation up to you)
-
+console.log("user logged out")
     return observableThrowError("");
 }
 }
